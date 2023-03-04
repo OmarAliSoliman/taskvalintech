@@ -78,7 +78,11 @@ products.map((item) => {
         <p class="product_price">${item.product_price}</p>
       </div>
       <div class="card_option">
-        ${item.added_to_cart ? ('<a href="" class="remove_from_cart remove_cart_btn" >Remove Item</a>') : ('<a href="" class="add_to_cart add_cart_btn" >add Item</a>')}
+        ${
+          item.added_to_cart
+            ? '<a href="" class="remove_from_cart remove_cart_btn" >Remove Item</a>'
+            : '<a href="" class="add_to_cart add_cart_btn" >add Item</a>'
+        }
         <a href="" class="quick_view" >Quick View</a>
       </div>
     </div>
@@ -93,6 +97,7 @@ cartIcon.addEventListener("click", function () {
   const target = this.parentElement.querySelector(".cart_list");
   target.classList.toggle("active_cart");
 });
+
 
 // toggle open/close quick view modal
 document.querySelectorAll(".product_card").forEach((item) => {
@@ -121,38 +126,39 @@ closeQuickViewModal.addEventListener("click", function (e) {
   htmlViewModal.classList.remove("active_modal");
 });
 
+
 // add to cart list
-document.querySelectorAll(".product_card").forEach((item) => {
-  item
-    .querySelector(".card_option .add_cart_btn")
-    .addEventListener("click", function (e) {
-      e.preventDefault();
-      let cartNumber = cartIcon.querySelector(".number").textContent;
-      console.log(cartNumber);
-      const cart_list = `<li>
-    <div class="cart_list_card">
-      <div class="cart_list_img">
-        <div class="card_img">
-          <div class="img_parent">
-            <img src=${item.querySelector(".img_parent img").src} alt="">
+document.querySelectorAll(".add_cart_btn").forEach((item) => {
+  item.addEventListener("click", function (e) {
+    e.preventDefault();
+    let cartNumber = cartIcon.querySelector(".number").textContent;
+    let parentElement = item.closest('.product_card');
+    const cart_list = `<li>
+        <div class="cart_list_card">
+          <div class="cart_list_img">
+            <div class="card_img">
+              <div class="img_parent">
+                <img src=${parentElement.querySelector(".img_parent img").src} alt="">
+              </div>
+            </div>
+            <div class="card_name">${
+              parentElement.querySelector(".product_body .product_name").textContent
+            }</div>
           </div>
+          <p class="cart_list_price">${
+            parentElement.querySelector(".product_body .product_price").textContent
+          } <span>$</span></p>
         </div>
-        <div class="card_name">${
-          item.querySelector(".product_body .product_name").textContent
-        }</div>
-      </div>
-      <p class="cart_list_price">${
-        item.querySelector(".product_body .product_price").textContent
-      } <span>$</span></p>
-    </div>
-  </li>`;
+      </li>`;
 
-      if (cartList.innerHTML == "No Product") {
-        cartList.innerHTML = cart_list;
-      } else {
-        cartList.innerHTML += cart_list;
-      }
+    if (cartList.innerHTML == "No Product") {
+      cartList.innerHTML = cart_list;
+    } else {
+      cartList.innerHTML += cart_list;
+    }
 
-      cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
-    });
+    cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
+  });
 });
+
+
