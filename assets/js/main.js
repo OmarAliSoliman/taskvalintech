@@ -7,7 +7,7 @@ const closeQuickViewModal = document.querySelector(
   ".quick_view_modal .close_modal"
 );
 const cartList = document.querySelector(".mynavbar .cart_list ul");
-const products = [
+const productsarry = [
   {
     product_name: "Woden Chair",
     product_price: "100",
@@ -58,6 +58,9 @@ const products = [
   },
 ];
 
+localStorage.setItem("products", JSON.stringify(productsarry));
+const products = JSON.parse(localStorage.getItem("products"));
+console.log(products);
 // check
 if (cartList.innerHTML.trim() == "") {
   console.log("empty");
@@ -65,31 +68,34 @@ if (cartList.innerHTML.trim() == "") {
 }
 
 // append product cards
-products.map((item) => {
-  const product_item = `<div class="col-sm-12 col-md-6 col-lg-3">
-    <div class="product_card">
-      <div class="product_image">
-        <div class="img_parent">
-          <img src=${item.product_image} alt="product-1">
+const drawTheProduct=()=>{
+  products.map((item) => {
+    const product_item = `<div class="col-sm-12 col-md-6 col-lg-3">
+      <div class="product_card">
+        <div class="product_image">
+          <div class="img_parent">
+            <img src=${item.product_image} alt="product-1">
+          </div>
+        </div>
+        <div class="product_body">
+          <h5 class="product_name">${item.product_name}</h5>
+          <p class="product_price">${item.product_price}</p>
+        </div>
+        <div class="card_option">
+          ${
+            item.added_to_cart
+              ? '<a href="" class="c_oprion remove_from_cart" >Remove Item</a>'
+              : '<a href="" class="c_oprion add_to_cart" >add Item</a>'
+          }
+          <a href="" class="quick_view" >Quick View</a>
         </div>
       </div>
-      <div class="product_body">
-        <h5 class="product_name">${item.product_name}</h5>
-        <p class="product_price">${item.product_price}</p>
-      </div>
-      <div class="card_option">
-        ${
-          item.added_to_cart
-            ? '<a href="" class="remove_from_cart remove_cart_btn" >Remove Item</a>'
-            : '<a href="" class="add_to_cart add_cart_btn" >add Item</a>'
-        }
-        <a href="" class="quick_view" >Quick View</a>
-      </div>
-    </div>
-    </div>`;
-
-  productSection.innerHTML += product_item;
-});
+      </div>`;
+  
+    productSection.innerHTML += product_item;
+  });
+}
+drawTheProduct();
 
 // toggle open/close cart shoppign
 cartIcon.addEventListener("click", function () {
@@ -112,10 +118,15 @@ document.querySelectorAll(".product_card").forEach((item) => {
       let product_price = item.querySelector(
         ".product_body .product_price"
       ).textContent;
-
+      let cardOption = item.querySelector(".card_option .c_oprion").cloneNode(true);
+      console.log(cardOption);
+      console.log(quickViewModal.querySelector(".card_option a"));
+      
       quickViewModal.querySelector(".modal_card_img img").src = product_image;
       quickViewModal.querySelector(".card_name").textContent = product_name;
       quickViewModal.querySelector(".card_price").textContent = product_price;
+      quickViewModal.querySelector(".card_option").appendChild(cardOption);
+
 
       htmlViewModal.classList.add("active_modal");
     });
@@ -124,11 +135,12 @@ document.querySelectorAll(".product_card").forEach((item) => {
 closeQuickViewModal.addEventListener("click", function (e) {
   e.preventDefault();
   htmlViewModal.classList.remove("active_modal");
+  this.closest('.modal_parent').querySelector('.card_option').innerHTML = "";
 });
 
 
 // add to cart list
-document.querySelectorAll(".add_cart_btn").forEach((item) => {
+document.querySelectorAll(".add_to_cart").forEach((item, index) => {
   item.addEventListener("click", function (e) {
     e.preventDefault();
     let cartNumber = cartIcon.querySelector(".number").textContent;
@@ -158,6 +170,15 @@ document.querySelectorAll(".add_cart_btn").forEach((item) => {
     }
 
     cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
+
+    item.textContent = 'Remove Item';
+    item.className = 'c_oprion remove_from_cart';
+    console.log(products[index].product_name);
+    // localStorage.get
+    // console.log(products[index].added_to_cart = true)
+    // console.log(products);
+    // drawTheProduct()
+
   });
 });
 

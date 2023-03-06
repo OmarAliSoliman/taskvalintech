@@ -319,7 +319,7 @@ ul {
       }
     }
   }
-  .add_to_cart{
+  a{
     width: 100%;
     display: block;
     border: 1px solid $mainColor;
@@ -329,6 +329,15 @@ ul {
     color: $mainColor;
     border-radius: 5px;
     margin-top: 20px;
+    color: #fff;
+    &.remove_from_cart{
+      background-color: rgb(129, 0, 0);
+      border-color: rgb(129, 0, 0);
+    }
+    &.add_to_cart{
+      background-color: green;
+      border-color: green;
+    }
   }
 }
 
