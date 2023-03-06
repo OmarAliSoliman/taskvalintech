@@ -24,7 +24,7 @@ const productsarry = [
     product_name: "green tall chair",
     product_price: "200",
     product_image: "./assets/images/product-3.jpg",
-    added_to_cart: true,
+    added_to_cart: false,
   },
   {
     product_name: "white wood table",
@@ -58,8 +58,18 @@ const productsarry = [
   },
 ];
 
-localStorage.setItem("products", JSON.stringify(productsarry));
-const products = JSON.parse(localStorage.getItem("products"));
+var products;
+const localProducts = localStorage.getItem("products");
+if (localProducts === null) {
+  products = productsarry;
+  localStorage.setItem("products", JSON.stringify(products));
+} else {
+  products = JSON.parse(localStorage.getItem("products"));
+  console.log("yes")
+}
+
+
+
 console.log(products);
 // check
 if (cartList.innerHTML.trim() == "") {
@@ -68,10 +78,10 @@ if (cartList.innerHTML.trim() == "") {
 }
 
 // append product cards
-const drawTheProduct=()=>{
-  products.map((item) => {
+const drawTheProduct = () => {
+  products.map((item, index) => {
     const product_item = `<div class="col-sm-12 col-md-6 col-lg-3">
-      <div class="product_card">
+      <div class="product_card" data-index=${index}>
         <div class="product_image">
           <div class="img_parent">
             <img src=${item.product_image} alt="product-1">
@@ -82,16 +92,15 @@ const drawTheProduct=()=>{
           <p class="product_price">${item.product_price}</p>
         </div>
         <div class="card_option">
-          ${
-            item.added_to_cart
-              ? '<a href="" class="c_oprion remove_from_cart" >Remove Item</a>'
-              : '<a href="" class="c_oprion add_to_cart" >add Item</a>'
-          }
+          ${item.added_to_cart
+        ? '<a href="" class="c_oprion remove_from_cart" >Remove Item</a>'
+        : '<a href="" class="c_oprion add_to_cart" >add Item</a>'
+      }
           <a href="" class="quick_view" >Quick View</a>
         </div>
       </div>
       </div>`;
-  
+
     productSection.innerHTML += product_item;
   });
 }
@@ -121,7 +130,7 @@ document.querySelectorAll(".product_card").forEach((item) => {
       let cardOption = item.querySelector(".card_option .c_oprion").cloneNode(true);
       console.log(cardOption);
       console.log(quickViewModal.querySelector(".card_option a"));
-      
+
       quickViewModal.querySelector(".modal_card_img img").src = product_image;
       quickViewModal.querySelector(".card_name").textContent = product_name;
       quickViewModal.querySelector(".card_price").textContent = product_price;
@@ -139,47 +148,71 @@ closeQuickViewModal.addEventListener("click", function (e) {
 });
 
 
+function addToCart(e, item){
+  e.preventDefault();
+  let cartNumber = cartIcon.querySelector(".number").textContent;
+  let parentElement = item.closest('.product_card');
+  const prod_index = parentElement.getAttribute('data-index');
+
+  const cart_list = `<li data-index=${prod_index}>
+      <div class="cart_list_card">
+        <div class="cart_list_img">
+          <div class="card_img">
+            <div class="img_parent">
+              <img src=${parentElement.querySelector(".img_parent img").src} alt="">
+            </div>
+          </div>
+          <div class="card_name">${parentElement.querySelector(".product_body .product_name").textContent
+    }</div>
+        </div>
+        <p class="cart_list_price">${parentElement.querySelector(".product_body .product_price").textContent
+    } <span>$</span></p>
+      </div>
+    </li>`;
+
+  if (cartList.innerHTML == "No Product") {
+    cartList.innerHTML = cart_list;
+  } else {
+    cartList.innerHTML += cart_list;
+  }
+
+  cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
+
+  item.textContent = 'Remove Item';
+  item.className = 'c_oprion remove_from_cart';
+  item.addEventListener('click', function() {
+    removeFromCart(e, item);
+  });
+  console.log(prod_index)
+  products[prod_index].added_to_cart = true;
+  localStorage.setItem('products', JSON.stringify(products))
+}
+
+function removeFromCart(e, item){
+  e.preventDefault();
+  console.log('removed')
+  item.textContent = 'Add Item';
+  item.className = 'c_oprion add_to_cart';
+  item.addEventListener('click', function() {
+    addToCart(e, item);
+  });
+}
+
+
+
+
 // add to cart list
 document.querySelectorAll(".add_to_cart").forEach((item, index) => {
   item.addEventListener("click", function (e) {
-    e.preventDefault();
-    let cartNumber = cartIcon.querySelector(".number").textContent;
-    let parentElement = item.closest('.product_card');
-    const cart_list = `<li>
-        <div class="cart_list_card">
-          <div class="cart_list_img">
-            <div class="card_img">
-              <div class="img_parent">
-                <img src=${parentElement.querySelector(".img_parent img").src} alt="">
-              </div>
-            </div>
-            <div class="card_name">${
-              parentElement.querySelector(".product_body .product_name").textContent
-            }</div>
-          </div>
-          <p class="cart_list_price">${
-            parentElement.querySelector(".product_body .product_price").textContent
-          } <span>$</span></p>
-        </div>
-      </li>`;
-
-    if (cartList.innerHTML == "No Product") {
-      cartList.innerHTML = cart_list;
-    } else {
-      cartList.innerHTML += cart_list;
-    }
-
-    cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
-
-    item.textContent = 'Remove Item';
-    item.className = 'c_oprion remove_from_cart';
-    console.log(products[index].product_name);
-    // localStorage.get
-    // console.log(products[index].added_to_cart = true)
-    // console.log(products);
-    // drawTheProduct()
-
+    addToCart(e, item);
   });
 });
 
+
+// remove from cart list
+document.querySelectorAll(".remove_from_cart").forEach((item, index)=>{
+  item.addEventListener('click', function(e){
+    removeFromCart(e, item);
+  })
+})
 
