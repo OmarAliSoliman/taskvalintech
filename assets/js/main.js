@@ -92,7 +92,7 @@ if (cartList.innerHTML.trim() == "") {
 // append product cards
 const drawTheProduct = () => {
   products.map((item, index) => {
-    const product_item = `<div class="col-sm-12 col-md-6 col-lg-3">
+    const product_item = `<div class="col-sm-12 col-md-6 col-lg-4 col-xl-3">
       <div class="product_card" data-index=${index}>
         <div class="product_image">
           <div class="img_parent">
