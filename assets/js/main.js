@@ -8,6 +8,13 @@ const closeQuickViewModal = document.querySelector(
   ".quick_view_modal .close_modal"
 );
 const cartList = document.querySelector(".mynavbar .cart_list ul");
+const cartListfromStorage = JSON.parse(localStorage.getItem("cartListStorage"));
+if (cartListfromStorage !== null) {
+  // console.log(cartListfromStorage);
+  cartList.innerHTML = cartListfromStorage
+  cartListNumber.textContent = JSON.parse(localStorage.getItem("cartListStorageNumber"));
+}
+
 const productsarry = [
   {
     product_name: "Woden Chair",
@@ -66,19 +73,19 @@ if (localProducts === null) {
   localStorage.setItem("products", JSON.stringify(products));
 } else {
   products = JSON.parse(localStorage.getItem("products"));
-  console.log("yes")
+  // console.log("yes")
 }
 
 
-var cart_list_local = cartList.querySelectorAll('li');
-console.log(cart_list_local);
-localStorage.setItem("cartListItem", JSON.stringify(cart_list_local));  
+// var cart_list_local = cartList.querySelectorAll('li');
+// console.log(cart_list_local);
+// localStorage.setItem("cartListItem", JSON.stringify(cart_list_local));  
 
 
-console.log(products);
+// console.log(products);
 // check
 if (cartList.innerHTML.trim() == "") {
-  console.log("empty");
+  // console.log("empty");
   cartList.innerHTML = "No Product";
 }
 
@@ -125,6 +132,7 @@ document.querySelectorAll(".product_card").forEach((item) => {
     .querySelector(".card_option .quick_view")
     .addEventListener("click", function (e) {
       e.preventDefault();
+      let dataIndex = item.getAttribute("data-index");
       let product_image = item.querySelector(".img_parent img").src;
       let product_name = item.querySelector(
         ".product_body .product_name"
@@ -133,13 +141,14 @@ document.querySelectorAll(".product_card").forEach((item) => {
         ".product_body .product_price"
       ).textContent;
       let cardOption = item.querySelector(".card_option .c_oprion").cloneNode(true);
-      console.log(cardOption);
-      console.log(quickViewModal.querySelector(".card_option a"));
+      // console.log(cardOption);
+      // console.log(quickViewModal.querySelector(".card_option a"));
 
       quickViewModal.querySelector(".modal_card_img img").src = product_image;
       quickViewModal.querySelector(".card_name").textContent = product_name;
       quickViewModal.querySelector(".card_price").textContent = product_price;
       quickViewModal.querySelector(".card_option").appendChild(cardOption);
+      quickViewModal.querySelector(".modal_card_parent").setAttribute('data-index', dataIndex);
 
 
       htmlViewModal.classList.add("active_modal");
@@ -153,11 +162,16 @@ closeQuickViewModal.addEventListener("click", function (e) {
 });
 
 
-function addToCart(e, item){
+function addToCart(e, item, type) {
   e.preventDefault();
   cartListNumber = document.querySelector(".mynavbar .cart_card .number")
   // let cartNumber = cartIcon.querySelector(".number").textContent;
-  let parentElement = item.parentElement.parentElement;
+  var parentElement;
+  if (type == 'modal') {
+    parentElement = item.parentElement.parentElement.parentElement;
+  } else {
+    parentElement = item.parentElement.parentElement;
+  }
   const prod_index = parentElement.getAttribute('data-index');
 
   const cart_list = `<li data-index=${prod_index}>
@@ -168,8 +182,7 @@ function addToCart(e, item){
               <img src=${parentElement.querySelector(".img_parent img").src} alt="">
             </div>
           </div>
-          <div class="card_name">${parentElement.querySelector(".product_body .product_name").textContent
-    }</div>
+          <div class="card_name">${parentElement.querySelector(".product_body .product_name").textContent}</div>
         </div>
         <p class="cart_list_price">${parentElement.querySelector(".product_body .product_price").textContent
     } <span>$</span></p>
@@ -187,71 +200,121 @@ function addToCart(e, item){
 
   item.textContent = 'Remove Item';
   item.className = 'c_oprion remove_from_cart';
+  if(type == 'modal'){
+    const ele = document.querySelector(`.products_section .product_card[data-index='${prod_index}'`);
+    ele.querySelector('.add_to_cart').textContent = 'Remove Item';
+    ele.querySelector('.add_to_cart').className = 'c_oprion remove_from_cart';
+  }
   // item.addEventListener('click', function() {
   //   removeFromCart(e, item);
   // });
   // console.log(prod_index)
+
+  // save products status to localstorage
   products[prod_index].added_to_cart = true;
   localStorage.setItem('products', JSON.stringify(products))
-  console.log(parseInt(cartListNumber.textContent));
+  // console.log(parseInt(cartListNumber.textContent));
   cartListNumber.textContent = parseInt(cartListNumber.textContent) + 1;
 
-  var cartListStorage = document.querySelectorAll('.mynavbar .cart_list ul li');
+  // save cartlist to localstorage
+  var cartListStorage = document.querySelectorAll('.mynavbar .cart_list ul')[0].innerHTML;
+  // console.log(cartListStorage)
   localStorage.setItem('cartListStorage', JSON.stringify(cartListStorage));
+  localStorage.setItem('cartListStorageNumber', parseInt(cartListNumber.textContent));
 
 }
 
 
 
 // remove from cart
-function removeFromCart(e, item){
+function removeFromCart(e, item, type) {
   e.preventDefault();
   cartListNumber = document.querySelector(".mynavbar .cart_card .number")
-  let parentElement = item.closest('.product_card');
+  var parentElement;
+  if (type == 'modal') {
+    parentElement = item.parentElement.parentElement.parentElement;
+  } else {
+    parentElement = item.parentElement.parentElement;
+  }
   const prod_index = parentElement.getAttribute('data-index');
 
   cartList.querySelectorAll('li').forEach((item, index) => {
-    if(item.getAttribute('data-index') === prod_index){
+    if (item.getAttribute('data-index') === prod_index) {
       item.remove();
     }
   })
 
   if (cartList.innerHTML == "") {
     cartList.innerHTML = "No Product";
-  } 
-
+  }
 
 
   item.textContent = 'Add Item';
   item.className = 'c_oprion add_to_cart';
+  if(type == 'modal'){
+    const ele = document.querySelector(`.products_section .product_card[data-index='${prod_index}'`);
+    ele.querySelector('.remove_from_cart').textContent = 'Add Item';
+    ele.querySelector('.remove_from_cart').className = 'c_oprion add_to_cart';
+  }
   // item.addEventListener('click', function() {
   //   addToCart(e, item);
   // });
+
+  // save products status to localstorage
   products[prod_index].added_to_cart = false;
   localStorage.setItem('products', JSON.stringify(products))
-  console.log(parseInt(cartListNumber.textContent));
+  // console.log(parseInt(cartListNumber.textContent));
   cartListNumber.textContent = parseInt(cartListNumber.textContent) - 1;
+
+
+  // save cartlist to localstorage
+  var cartListStorage = document.querySelectorAll('.mynavbar .cart_list ul')[0].innerHTML;
+  // console.log(cartListStorage)
+  localStorage.setItem('cartListStorage', JSON.stringify(cartListStorage));
+  localStorage.setItem('cartListStorageNumber', parseInt(cartListNumber.textContent));
+
 }
 
 
 
 
-// add to cart list
+// product click to add to cart list - remove from cart list
 const container = document.querySelector('.main_content .row');
 container.addEventListener('click', function (e) {
   // But only alert for elements that have an alert-button class
   if (e.target.classList.contains('add_to_cart')) {
     e.preventDefault();
-    console.log(e.target.parentElement.parentElement)
+    // console.log(e.target.parentElement.parentElement)
     const item = e.target;
-    addToCart(e, item)
-  }else if(e.target.classList.contains('remove_from_cart')){
+    addToCart(e, item, 'card')
+  } else if (e.target.classList.contains('remove_from_cart')) {
     e.preventDefault();
-    console.log(e.target.parentElement.parentElement)
+    // console.log(e.target.parentElement.parentElement)
     const item = e.target;
-    removeFromCart(e, item)
+    removeFromCart(e, item, 'card')
   }
 });
+
+
+// modal click to add to cart list - remove from cart list
+const momdalPreview = document.querySelector('.modal_parent .wrapper');
+momdalPreview.addEventListener('click', function (e) {
+  // But only alert for elements that have an alert-button class
+  if (e.target.classList.contains('add_to_cart')) {
+    e.preventDefault();
+    // console.log(e.target.parentElement.parentElement.parentElement)
+    const item = e.target;
+    addToCart(e, item, 'modal')
+  } else if (e.target.classList.contains('remove_from_cart')) {
+    e.preventDefault();
+    // console.log(e.target.parentElement.parentElement.parentElement)
+    const item = e.target;
+    removeFromCart(e, item, 'modal')
+  }
+});
+
+
+
 
 // document.querySelectorAll(".add_to_cart").forEach((item, index) => {
 //   item.addEventListener("click", function (e) {
