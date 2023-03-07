@@ -1,6 +1,7 @@
 // define varables
 const productSection = document.querySelector(".products_section .row");
 const cartIcon = document.querySelector(".mynavbar .cart_card");
+var cartListNumber = document.querySelector(".mynavbar .cart_card .number")
 const htmlViewModal = document.querySelector("html");
 const quickViewModal = document.querySelector(".quick_view_modal");
 const closeQuickViewModal = document.querySelector(
@@ -154,8 +155,9 @@ closeQuickViewModal.addEventListener("click", function (e) {
 
 function addToCart(e, item){
   e.preventDefault();
-  let cartNumber = cartIcon.querySelector(".number").textContent;
-  let parentElement = item.closest('.product_card');
+  cartListNumber = document.querySelector(".mynavbar .cart_card .number")
+  // let cartNumber = cartIcon.querySelector(".number").textContent;
+  let parentElement = item.parentElement.parentElement;
   const prod_index = parentElement.getAttribute('data-index');
 
   const cart_list = `<li data-index=${prod_index}>
@@ -180,28 +182,36 @@ function addToCart(e, item){
     cartList.innerHTML += cart_list;
   }
 
-  cartIcon.querySelector(".number").textContent = parseInt(cartNumber) + 1;
+
+  // console.log("add_cart_icon_number" + parseInt(cartNumber))
 
   item.textContent = 'Remove Item';
   item.className = 'c_oprion remove_from_cart';
-  item.addEventListener('click', function() {
-    removeFromCart(e, item);
-  });
-  console.log(prod_index)
+  // item.addEventListener('click', function() {
+  //   removeFromCart(e, item);
+  // });
+  // console.log(prod_index)
   products[prod_index].added_to_cart = true;
   localStorage.setItem('products', JSON.stringify(products))
+  console.log(parseInt(cartListNumber.textContent));
+  cartListNumber.textContent = parseInt(cartListNumber.textContent) + 1;
+
+  var cartListStorage = document.querySelectorAll('.mynavbar .cart_list ul li');
+  localStorage.setItem('cartListStorage', JSON.stringify(cartListStorage));
+
 }
 
+
+
+// remove from cart
 function removeFromCart(e, item){
   e.preventDefault();
-  let cartNumber = cartIcon.querySelector(".number").textContent;
-  console.log(cartNumber);
+  cartListNumber = document.querySelector(".mynavbar .cart_card .number")
   let parentElement = item.closest('.product_card');
   const prod_index = parentElement.getAttribute('data-index');
 
   cartList.querySelectorAll('li').forEach((item, index) => {
     if(item.getAttribute('data-index') === prod_index){
-      console.log(item);
       item.remove();
     }
   })
@@ -210,7 +220,6 @@ function removeFromCart(e, item){
     cartList.innerHTML = "No Product";
   } 
 
-  cartIcon.querySelector(".number").textContent = parseInt(cartNumber) - 1;
 
 
   item.textContent = 'Add Item';
@@ -220,23 +229,41 @@ function removeFromCart(e, item){
   // });
   products[prod_index].added_to_cart = false;
   localStorage.setItem('products', JSON.stringify(products))
+  console.log(parseInt(cartListNumber.textContent));
+  cartListNumber.textContent = parseInt(cartListNumber.textContent) - 1;
 }
 
 
 
 
 // add to cart list
-document.querySelectorAll(".add_to_cart").forEach((item, index) => {
-  item.addEventListener("click", function (e) {
-    addToCart(e, item);
-  });
+const container = document.querySelector('.main_content .row');
+container.addEventListener('click', function (e) {
+  // But only alert for elements that have an alert-button class
+  if (e.target.classList.contains('add_to_cart')) {
+    e.preventDefault();
+    console.log(e.target.parentElement.parentElement)
+    const item = e.target;
+    addToCart(e, item)
+  }else if(e.target.classList.contains('remove_from_cart')){
+    e.preventDefault();
+    console.log(e.target.parentElement.parentElement)
+    const item = e.target;
+    removeFromCart(e, item)
+  }
 });
+
+// document.querySelectorAll(".add_to_cart").forEach((item, index) => {
+//   item.addEventListener("click", function (e) {
+//     addToCart(e, item);
+//   });
+// });
 
 
 // remove from cart list
-document.querySelectorAll(".remove_from_cart").forEach((item, index)=>{
-  item.addEventListener('click', function(e){
-    removeFromCart(e, item);
-  })
-})
+// document.querySelectorAll(".remove_from_cart").forEach((item, index)=>{
+//   item.addEventListener('click', function(e){
+//     removeFromCart(e, item);
+//   })
+// })
 
