@@ -69,6 +69,10 @@ if (localProducts === null) {
 }
 
 
+var cart_list_local = cartList.querySelectorAll('li');
+console.log(cart_list_local);
+localStorage.setItem("cartListItem", JSON.stringify(cart_list_local));  
+
 
 console.log(products);
 // check
@@ -190,12 +194,32 @@ function addToCart(e, item){
 
 function removeFromCart(e, item){
   e.preventDefault();
-  console.log('removed')
+  let cartNumber = cartIcon.querySelector(".number").textContent;
+  console.log(cartNumber);
+  let parentElement = item.closest('.product_card');
+  const prod_index = parentElement.getAttribute('data-index');
+
+  cartList.querySelectorAll('li').forEach((item, index) => {
+    if(item.getAttribute('data-index') === prod_index){
+      console.log(item);
+      item.remove();
+    }
+  })
+
+  if (cartList.innerHTML == "") {
+    cartList.innerHTML = "No Product";
+  } 
+
+  cartIcon.querySelector(".number").textContent = parseInt(cartNumber) - 1;
+
+
   item.textContent = 'Add Item';
   item.className = 'c_oprion add_to_cart';
-  item.addEventListener('click', function() {
-    addToCart(e, item);
-  });
+  // item.addEventListener('click', function() {
+  //   addToCart(e, item);
+  // });
+  products[prod_index].added_to_cart = false;
+  localStorage.setItem('products', JSON.stringify(products))
 }
 
 
